@@ -1,4 +1,26 @@
-# SOF309: KIỂM THỬ NÂNG CAO CÙNG AI
+﻿# SOF309: KIỂM THỬ NÂNG CAO CÙNG AI
+> **Sinh viên:** Nguyễn Nam | **MSSV:** TV00363 | **Lớp:** SD21307  
+> **Dự án Web cá nhân:** TEA POS - Quản Lý & Bán Hàng Trà Sữa / Cà Phê  
+> **Giảng viên hướng dẫn:** ThS. Trần Quang Bình (binhtq7 - Thầy Mười Giáo)  
+> 📖 [Xem Cẩm nang hướng dẫn chi tiết từng tuần (Tuần 1 đến Tuần 6)](./docs/HUONG_DAN_CHI_TIET_6_TUAN.md)
+
+---
+
+### 🏆 BÁO CÁO NGHIỆM THU TUẦN 1 (02/11 - 08/11/2026) - Y1 & Y2
+- [x] **Khởi tạo Repo chuẩn:** https://github.com/num00363/SOF309_SD21307_Tv00363_NguyenNam.git (Template SOF309).
+- [x] **Tích hợp Web cũ (Y1):** Đã đưa toàn bộ mã nguồn TEA POS vào src/main/java/, src/main/resources/, src/main/webapp/ và cập nhật dependencies vào pom.xml.
+- [x] **Đặc tả nghiệp vụ (Y1):** File [docs/SPECIFICATIONS.md](./docs/SPECIFICATIONS.md) đặc tả 11 phân hệ, ma trận RBAC, validation rules.
+- [x] **Kế hoạch & Kịch bản Test bằng AI RAG (Y2):** 
+  - Kế hoạch kiểm thử: [docs/TEST_PLAN.md](./docs/TEST_PLAN.md) (IEEE 829).
+  - Bộ 24 kịch bản kiểm thử: [docs/TEST_CASES.md](./docs/TEST_CASES.md).
+- [x] **Minh chứng AI (Y6 - Điểm A):** [docs/ai-logs/01_test_design_ai.md](./docs/ai-logs/01_test_design_ai.md) (Ghi lại prompt, phiên bản AI **Gemini 3.8 Flash**, kết quả sinh ra).
+- [x] **Tài liệu kiểm thử bổ sung:**
+  - Báo cáo lỗi phát hiện: [docs/BUG_REPORT.md](./docs/BUG_REPORT.md) (10 bug UI/Code/SQL/Security).
+  - Báo cáo sửa lỗi chi tiết: [docs/FIXED_BUGS.md](./docs/FIXED_BUGS.md).
+  - Kịch bản Database SQL: [CSDL.sql](./CSDL.sql).
+  - Nhật ký hoạt động SDLC: [docs/ACTIVITY_LOG.md](./docs/ACTIVITY_LOG.md).
+
+---
 > **Master Template Assignment dành cho Sinh viên FPT Polytechnic**  
 > Giảng viên hướng dẫn: **ThS. Trần Quang Bình (binhtq7 - Thầy Mười Giáo)**  
 > 📖 [Xem Cẩm nang hướng dẫn chi tiết từng tuần (Tuần 1 đến Tuần 6)](./docs/HUONG_DAN_CHI_TIET_6_TUAN.md)

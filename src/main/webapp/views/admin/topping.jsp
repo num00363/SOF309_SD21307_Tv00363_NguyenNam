@@ -1,0 +1,444 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <title>TEA POS - Quản Lý Topping Ăn Kèm</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.all.min.js"></script>
+    <link href="${pageContext.request.contextPath}/assets/css/global.css" rel="stylesheet">
+    <link href="${pageContext.request.contextPath}/assets/css/admin.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="admin-wrapper">
+    <jsp:include page="/views/layout/sidebar_admin.jsp" />
+    <div class="admin-content">
+        <jsp:include page="/views/layout/header_admin.jsp" />
+        <div class="p-4">
+            <div class="card card-teapos p-4 shadow-sm border-0" style="border-radius: 12px; background-color: #ffffff;">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 text-start">
+                    <div>
+                        <h3 class="fw-bold mb-1 text-success text-uppercase"><i class="bi bi-egg-fried me-2"></i>QUẢN LÝ TOPPING</h3>
+                        <p class="text-muted small mb-0">Quản lý danh sách và giá các loại topping đi kèm.</p>
+                    </div>
+                    <div class="d-flex gap-2 align-items-end">
+                        <div class="input-group input-group-sm" style="width: 250px;">
+                            <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                            <input type="text" id="toppingSearchInput" class="form-control" placeholder="Tìm tên topping..." onkeyup="filterAndPaginateToppings()">
+                        </div>
+                        <button class="btn btn-primary-teapos d-flex align-items-center gap-2 fw-bold" onclick="openCreateToppingModal()">
+                            <i class="bi bi-plus-circle-fill"></i> Thêm Topping Mới
+                        </button>
+                    </div>
+                </div>
+                <!-- ==================== VIEW 1: DESKTOP LAYOUT ==================== -->
+                <div class="d-none d-lg-block table-responsive admin-table-container">
+                    <table class="table table-hover align-middle admin-table" id="toppingTable">
+                        <thead>
+                        <tr class="text-center">
+                            <th style="width: 80px;">STT</th>
+                            <th style="width: 120px;">Mã TP</th>
+                            <th style="width: 100px;" class="text-center">Hình Ảnh</th>
+                            <th class="text-start">Tên Topping Ăn Kèm</th>
+                            <th>Định Lượng</th>
+                            <th class="text-center">Đơn Giá</th>
+                            <th class="text-center">Sắp Xếp</th>
+                            <th class="text-center">Trạng Thái</th>
+                            <th style="width: 250px;" class="text-end">Hành Động</th>
+                        </tr>
+                        </thead>
+                        <tbody id="toppingTableBody">
+                        <c:choose>
+                            <c:when test="${not empty toppings}">
+                                <c:forEach var="item" items="${toppings}" varStatus="loop">
+                                    <tr class="topping-row text-center" data-id="${item.maTp}" data-name="<c:out value="${item.tenTp}"/>">
+                                        <td class="row-stt"><strong>${loop.index + 1}</strong></td>
+                                        <td><code class="fw-bold text-dark">${item.maTp}</code></td>
+                                        <td class="text-center">
+                                            <c:choose>
+                                                <c:when test="${not empty item.hinhAnh}">
+                                                    <img src="${item.hinhAnh}" class="rounded border" style="width: 44px; height: 44px; object-fit: cover;">
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <div class="bg-light text-muted d-flex align-items-center justify-content-center rounded border mx-auto" style="width: 44px; height: 44px;">
+                                                        <i class="bi bi-image fs-5"></i>
+                                                    </div>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td class="text-start"><span class="fw-bold text-dark"><c:out value="${item.tenTp}"/></span></td>
+                                        <td><c:out value="${not empty item.dinhLuong ? item.dinhLuong : 'Mặc định'}"/></td>
+                                        <td class="text-center fw-bold text-success">
+                                            <fmt:formatNumber value="${item.giaBan}" type="currency" currencySymbol="" maxFractionDigits="0"/>đ
+                                        </td>
+                                        <td class="text-center"><span class="badge bg-secondary px-2.5 py-1.5" style="border-radius: 6px;">${item.thuTuHienThi}</span></td>
+                                        <td class="text-center">
+                                                <span class="badge ${item.trangThai ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'} border px-3 py-1.5" style="border-radius: 50px;">
+                                                        ${item.trangThai ? 'Còn hàng' : 'Tạm hết'}
+                                                </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="d-flex justify-content-end gap-2 align-items-center">
+                                                <a href="${pageContext.request.contextPath}/admin/topping?action=toggle&id=${item.maTp}&status=${item.trangThai ? 0 : 1}" class="btn btn-sm ${item.trangThai ? 'btn-action-warning' : 'btn-action-edit'}" title="${item.trangThai ? 'Tạm ẩn' : 'Bật bán'}">
+                                                    <i class="bi ${item.trangThai ? 'bi-toggle2-off' : 'bi-toggle2-on'}"></i> ${item.trangThai ? 'Tạm Ẩn' : 'Bật Bán'}
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-action-edit" data-id="${item.maTp}" data-name="<c:out value="${item.tenTp}"/>" data-volume="${item.dinhLuong}" data-price="${item.giaBan}" data-sort="${item.thuTuHienThi}" data-status="${item.trangThai ? 1 : 0}" data-img="${item.hinhAnh}" onclick="handleEditToppingClick(this)">
+                                                    <i class="bi bi-pencil-square me-1"></i> Sửa
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-action-delete" onclick="confirmDeleteTopping('${item.maTp}')">
+                                                    <i class="bi bi-trash3-fill me-1"></i> Xóa
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                            </c:when>
+                            <c:otherwise>
+                                <tr><td colspan="9" class="text-center py-5 text-muted">Chưa ghi nhận Topping nào!</td></tr>
+                            </c:otherwise>
+                        </c:choose>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- ==================== VIEW 2: MOBILE LAYOUT ==================== -->
+                <div class="d-block d-lg-none" id="toppingMobileCards">
+                    <c:choose>
+                        <c:when test="${not empty toppings}">
+                            <c:forEach var="item" items="${toppings}" varStatus="loop">
+                                <div class="topping-card-col mb-3" data-id="${item.maTp}" data-name="<c:out value="${item.tenTp}"/>">
+                                    <div class="card p-3 border shadow-sm position-relative text-start" style="border-radius: 12px; background: #ffffff; border-color: var(--border-color) !important;">
+                                        <div class="position-absolute" style="top: 15px; right: 15px; cursor: pointer; z-index: 10;" onclick="toggleMobileCardDetails(this)">
+                                            <span class="badge bg-light rounded-circle text-success d-flex align-items-center justify-content-center border" style="width: 28px; height: 28px; border-color: var(--border-color) !important;">
+                                                <i class="bi bi-chevron-down fs-6"></i>
+                                            </span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2 pe-4">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="badge bg-light text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; font-weight: bold; border: 1px solid var(--border-color);">
+                                                        ${loop.index + 1}
+                                                </span>
+                                                <code class="fw-bold text-dark font-monospace">${item.maTp}</code>
+                                            </div>
+                                            <span class="badge ${item.trangThai ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'} border px-2.5 py-1" style="border-radius: 50px; font-size: 11px;">
+                                                    ${item.trangThai ? 'Còn hàng' : 'Hết hàng'}
+                                            </span>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <c:choose>
+                                                <c:when test="${not empty item.hinhAnh}">
+                                                    <img src="${item.hinhAnh}" class="rounded border" style="width: 50px; height: 50px; object-fit: cover;">
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <div class="bg-light text-muted d-flex align-items-center justify-content-center rounded border" style="width: 50px; height: 50px;">
+                                                        <i class="bi bi-image fs-4"></i>
+                                                    </div>
+                                                </c:otherwise>
+                                            </c:choose>
+                                            <div>
+                                                <h6 class="fw-bold text-dark mb-1"><c:out value="${item.tenTp}"/></h6>
+                                                <div class="text-success fw-bold font-monospace" style="font-size: 13.5px;">
+                                                    <fmt:formatNumber value="${item.giaBan}" type="currency" currencySymbol="" maxFractionDigits="0"/>đ
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mobile-card-details border-top pt-2 mt-2 text-start small d-none" style="line-height: 1.6;">
+                                            <div class="text-muted d-flex justify-content-between">
+                                                <span>Định lượng:</span>
+                                                <strong class="text-dark"><c:out value="${not empty item.dinhLuong ? item.dinhLuong : 'Mặc định'}"/></strong>
+                                            </div>
+                                            <div class="text-muted d-flex justify-content-between mt-1">
+                                                <span>Sắp xếp thứ tự:</span>
+                                                <strong class="text-dark">${item.thuTuHienThi}</strong>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-2 border-top pt-2 mt-2">
+                                            <a href="${pageContext.request.contextPath}/admin/topping?action=toggle&id=${item.maTp}&status=${item.trangThai ? 0 : 1}" class="btn btn-sm ${item.trangThai ? 'btn-outline-warning' : 'btn-outline-success'} fw-bold flex-grow-1" style="border-radius: 8px;">
+                                                <i class="bi ${item.trangThai ? 'bi-toggle2-off' : 'bi-toggle2-on'}"></i> ${item.trangThai ? 'Tạm Ẩn' : 'Bật Bán'}
+                                            </a>
+                                            <button type="button" class="btn btn-outline-primary btn-sm fw-bold flex-grow-1" style="border-radius: 8px;" data-id="${item.maTp}" data-name="<c:out value="${item.tenTp}"/>" data-volume="${item.dinhLuong}" data-price="${item.giaBan}" data-sort="${item.thuTuHienThi}" data-status="${item.trangThai ? 1 : 0}" data-img="${item.hinhAnh}" onclick="handleEditToppingClick(this)">
+                                                <i class="bi bi-pencil-square"></i> Sửa
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm fw-bold flex-grow-1" style="border-radius: 8px;" onclick="confirmDeleteTopping('${item.maTp}')">
+                                                <i class="bi bi-trash3-fill"></i> Xóa
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="text-center py-5 text-muted bg-white rounded-3 border">Chưa ghi nhận Topping nào!</div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+                <!-- PHÂN TRANG -->
+                <div class="pagination-container" id="paginationWrapper" style="display: none;">
+                    <span class="small text-muted" id="paginationInfo">Hiển thị từ 1 đến 10 dòng dữ liệu</span>
+                    <nav aria-label="Table pagination">
+                        <ul class="pagination pagination-sm justify-content-end mb-0" id="paginationButtons"></ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FORM MODAL -->
+<div class="modal fade" id="toppingFormModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header text-white py-3" style="background-color: var(--primary);">
+                <h5 class="modal-title fw-bold" id="toppingModalTitle">THÊM TOPPING MỚI</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="toppingForm" action="${pageContext.request.contextPath}/admin/topping" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="action" id="formAction" value="create">
+                <input type="hidden" name="maTp" id="formMaTp" value="">
+                <input type="hidden" name="currentHinhAnh" id="currentHinhAnh" value="">
+                <div class="modal-body p-4 text-start">
+                    <div class="mb-3">
+                        <label for="tenTp" class="form-label fw-bold small text-muted">Tên Topping <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-teapos" id="tenTp" name="tenTp" placeholder="Trân châu hoàng kim..." required autocomplete="off">
+                    </div>
+                    <div class="mb-3">
+                        <label for="dinhLuong" class="form-label fw-bold small text-muted">Định lượng tiêu chuẩn</label>
+                        <input type="text" class="form-control form-control-teapos" id="dinhLuong" name="dinhLuong" placeholder="30g...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="giaBan" class="form-label fw-bold small text-muted">Đơn giá bán (VNĐ) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control form-control-teapos text-end fw-bold text-success" id="giaBan" name="giaBan" value="0" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted d-block">Hình ảnh minh họa Topping</label>
+                        <ul class="nav nav-pills mb-2 bg-light p-1 rounded-pill" id="imgTab" role="tablist">
+                            <li class="nav-item flex-fill text-center">
+                                <button type="button" class="nav-link active rounded-pill py-1 fs-12 w-100" id="file-tab" data-bs-toggle="tab" data-bs-target="#filePanel" onclick="switchToppingUploadType('file')">TẢI TỪ MÁY TÍNH</button>
+                            </li>
+                            <li class="nav-item flex-fill text-center">
+                                <button type="button" class="nav-link rounded-pill py-1 fs-12 w-100" id="url-tab" data-bs-toggle="tab" data-bs-target="#urlPanel" onclick="switchToppingUploadType('url')">DÁN ĐƯỜNG DẪN URL</button>
+                            </li>
+                        </ul>
+                        <input type="hidden" name="uploadType" id="uploadType" value="file">
+                        <div class="tab-content" id="imgTabContent">
+                            <div class="tab-pane show active p-2 border rounded bg-white" id="filePanel" role="tabpanel">
+                                <input type="file" class="form-control form-control-sm" name="hinhAnhFile" id="hinhAnhFile" accept="image/*">
+                            </div>
+                            <div class="tab-pane p-2 border rounded bg-white" id="urlPanel" role="tabpanel" style="display: none;">
+                                <input type="text" class="form-control form-control-sm" name="hinhAnhUrl" id="hinhAnhUrl" placeholder="https://image-path...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="thuTuHienThi" class="form-label fw-bold small text-muted">Thứ tự hiển thị</label>
+                        <input type="number" class="form-control form-control-teapos" id="thuTuHienThi" name="thuTuHienThi" value="0" min="0" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold small text-muted d-block">Trạng thái bán</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="trangThai" id="statusActive" value="1" checked>
+                            <label class="form-check-label text-success fw-medium" for="statusActive">Còn hàng</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="trangThai" id="statusInactive" value="0">
+                            <label class="form-check-label text-danger" for="statusInactive">Tạm hết hàng</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light" style="border-radius: 0 0 12px 12px;">
+                    <button type="button" class="btn btn-secondary-teapos" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-primary-teapos"><i class="bi bi-save me-1"></i> Lưu lại</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/global.js"></script>
+<script>
+    const tpFormModal = new bootstrap.Modal(document.getElementById('toppingFormModal'));
+    function switchToppingUploadType(type) {
+        document.getElementById('uploadType').value = type;
+        if (type === 'file') {
+            document.getElementById('filePanel').style.setProperty('display', 'block', 'important');
+            document.getElementById('urlPanel').style.setProperty('display', 'none', 'important');
+        } else {
+            document.getElementById('filePanel').style.setProperty('display', 'none', 'important');
+            document.getElementById('urlPanel').style.setProperty('display', 'block', 'important');
+        }
+    }
+    function openCreateToppingModal() {
+        document.getElementById("toppingForm").reset();
+        document.getElementById("toppingModalTitle").innerText = "THÊM TOPPING MỚI";
+        document.getElementById("formAction").value = "create";
+        document.getElementById("formMaTp").value = "";
+        document.getElementById("currentHinhAnh").value = "";
+        document.getElementById("statusActive").checked = true;
+        document.getElementById("hinhAnhFile").value = "";
+        document.getElementById("hinhAnhUrl").value = "";
+        switchToppingUploadType('file');
+        tpFormModal.show();
+    }
+    function handleEditToppingClick(button) {
+        const id = button.getAttribute("data-id");
+        const name = button.getAttribute("data-name");
+        const volume = button.getAttribute("data-volume");
+        const price = button.getAttribute("data-price");
+        const sort = button.getAttribute("data-sort");
+        const status = parseInt(button.getAttribute("data-status"));
+        const img = button.getAttribute("data-img");
+        openEditToppingModal(id, name, volume, price, sort, status, img);
+    }
+    function openEditToppingModal(maTp, tenTp, dinhLuong, giaBan, thuTu, trangThai, hinhAnh) {
+        document.getElementById("toppingModalTitle").innerText = "CẬP NHẬT TOPPING";
+        document.getElementById("formAction").value = "edit";
+        document.getElementById("formMaTp").value = maTp;
+        document.getElementById("tenTp").value = tenTp;
+        document.getElementById("dinhLuong").value = dinhLuong === "Mặc định" ? "" : dinhLuong;
+        document.getElementById("giaBan").value = giaBan;
+        document.getElementById("thuTuHienThi").value = thuTu;
+        document.getElementById("currentHinhAnh").value = hinhAnh ? hinhAnh : "";
+        document.getElementById("hinhAnhUrl").value = hinhAnh ? hinhAnh : "";
+        document.getElementById("hinhAnhFile").value = "";
+        if (trangThai === 1) {
+            document.getElementById("statusActive").checked = true;
+        } else {
+            document.getElementById("statusInactive").checked = true;
+        }
+        switchToppingUploadType(hinhAnh && hinhAnh.startsWith('http') ? 'url' : 'file');
+        tpFormModal.show();
+    }
+    function confirmDeleteTopping(maTp) {
+        Swal.fire({
+            title: 'Xóa Topping?',
+            text: "Bạn có chắc chắn muốn xóa topping này?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Đồng ý',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '${pageContext.request.contextPath}/admin/topping?action=delete&id=' + maTp;
+            }
+        });
+    }
+    function toggleMobileCardDetails(element) {
+        const card = element.closest('.card');
+        const details = card.querySelector('.mobile-card-details');
+        const icon = element.querySelector('i');
+        if (details.classList.contains('d-none')) {
+            details.classList.remove('d-none');
+            icon.className = 'bi bi-chevron-up fs-6';
+        } else {
+            details.classList.add('d-none');
+            icon.className = 'bi bi-chevron-down fs-6';
+        }
+    }
+    let currentPage = 1;
+    const pageSize = 10;
+    let filteredDesktopRows = [];
+    let filteredMobileCards = [];
+    function filterAndPaginateToppings() {
+        const searchInput = document.getElementById("toppingSearchInput");
+        if (!searchInput) return;
+        const searchVal = searchInput.value.trim().toLowerCase();
+        const allRows = Array.from(document.querySelectorAll("#toppingTableBody .topping-row"));
+        filteredDesktopRows = allRows.filter(row => {
+            const id = row.dataset.id.toLowerCase();
+            const name = row.dataset.name.toLowerCase();
+            return id.includes(searchVal) || name.includes(searchVal);
+        });
+        const allCards = Array.from(document.querySelectorAll("#toppingMobileCards .topping-card-col"));
+        filteredMobileCards = allCards.filter(card => {
+            const id = card.dataset.id.toLowerCase();
+            const name = card.dataset.name.toLowerCase();
+            return id.includes(searchVal) || name.includes(searchVal);
+        });
+        currentPage = 1;
+        renderTableRows();
+    }
+    function renderTableRows() {
+        const allRows = document.querySelectorAll("#toppingTableBody .topping-row");
+        allRows.forEach(row => row.style.display = "none");
+        const totalRows = filteredDesktopRows.length;
+        const totalPages = Math.ceil(totalRows / pageSize) || 1;
+        if (currentPage < 1) currentPage = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+        const startIdx = (currentPage - 1) * pageSize;
+        const endIdx = Math.min(startIdx + pageSize, totalRows);
+        const pageRows = filteredDesktopRows.slice(startIdx, endIdx);
+        pageRows.forEach((row, idx) => {
+            row.style.display = "table-row";
+            row.querySelector(".row-stt strong").innerText = startIdx + idx + 1;
+        });
+        const allCards = document.querySelectorAll("#toppingMobileCards .topping-card-col");
+        allCards.forEach(card => card.style.setProperty('display', 'none', 'important'));
+        const pageCards = filteredMobileCards.slice(startIdx, endIdx);
+        pageCards.forEach(card => {
+            card.style.setProperty('display', 'block', 'important');
+        });
+        updatePaginationControls(startIdx, endIdx, totalRows, totalPages);
+    }
+    function updatePaginationControls(startIdx, endIdx, totalRows, totalPages) {
+        const infoEl = document.getElementById("paginationInfo");
+        const btnContainer = document.getElementById("paginationButtons");
+        const wrapper = document.getElementById("paginationWrapper");
+        if (!infoEl || !btnContainer || !wrapper) return;
+        const start = totalRows > 0 ? startIdx + 1 : 0;
+        infoEl.innerText = 'Hiển thị từ ' + start + ' đến ' + endIdx + ' dòng trên tổng số ' + totalRows + ' dòng Topping';
+        btnContainer.innerHTML = "";
+        if (totalPages <= 1) {
+            wrapper.style.setProperty('display', 'none', 'important');
+            return;
+        }
+        wrapper.style.setProperty('display', 'flex', 'important');
+        const prevLi = document.createElement("li");
+        prevLi.className = "page-item " + (currentPage === 1 ? "disabled" : "");
+        prevLi.innerHTML = '<a class="page-link text-success" href="javascript:void(0)" onclick="changePage(' + (currentPage - 1) + ')">&laquo; Trước</a>';
+        btnContainer.appendChild(prevLi);
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement("li");
+            li.className = "page-item " + (currentPage === i ? "active" : "");
+            li.innerHTML = '<a class="page-link ' + (currentPage === i ? "bg-success border-success text-white" : "text-success") + '" href="javascript:void(0)" onclick="changePage(' + i + ')">' + i + '</a>';
+            btnContainer.appendChild(li);
+        }
+        const nextLi = document.createElement("li");
+        nextLi.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
+        nextLi.innerHTML = '<a class="page-link text-success" href="javascript:void(0)" onclick="changePage(' + (currentPage + 1) + ')">Sau &raquo;</a>';
+        btnContainer.appendChild(nextLi);
+    }
+    function changePage(page) {
+        const totalPages = Math.ceil(filteredDesktopRows.length / pageSize) || 1;
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        renderTableRows();
+    }
+    function getContextPath() {
+        return window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1));
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const msg = urlParams.get('msg');
+        if (msg === 'createsuccess') showToast('success', 'Thêm Topping thành công!');
+        if (msg === 'updatesuccess') showToast('success', 'Cập nhật Topping thành công!');
+        if (msg === 'softdeletesuccess') {
+            Swal.fire({
+                icon: 'info',
+                title: 'Tạm ẩn Topping',
+                text: 'Topping này đã dính đơn bán lẻ trong quá khứ! Hệ thống tự động chuyển trạng thái hoạt động về 0 để bảo lưu cấu trúc hóa đơn!',
+                confirmButtonColor: '#10b981'
+            });
+        }
+        if (msg === 'harddeletesuccess') showToast('success', 'Đã xóa cứng vĩnh viễn Topping khỏi CSDL!');
+        filterAndPaginateToppings();
+    });
+</script>
+</body>
+</html>

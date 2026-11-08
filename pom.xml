@@ -10,7 +10,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>SOF309 Assignment - AI Driven Test Automation</name>
+    <name>SOF309 Assignment - AI Driven Test Automation (TEA POS - Nguyen Nam)</name>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -41,7 +41,60 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- (Tùy chọn) Web Server & DB cũ của sinh viên có thể dán thêm vào đây -->
+        <!-- ============================================== -->
+        <!-- WEB DEPENDENCIES (DỰ ÁN TEA POS - TV00363)      -->
+        <!-- ============================================== -->
+        <!-- 1. JAKARTA SERVLET & JSP API -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet.jsp</groupId>
+            <artifactId>jakarta.servlet.jsp-api</artifactId>
+            <version>3.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- 2. JAKARTA JSTL RUNTIME -->
+        <dependency>
+            <groupId>jakarta.servlet.jsp.jstl</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
+        <!-- 3. SQL SERVER & CONNECTION POOL -->
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <version>12.4.2.jre11</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>5.0.0</version>
+        </dependency>
+
+        <!-- 4. GSON FOR JSON CONVERSIONS -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
+        </dependency>
+
+        <!-- 5. ANGUS MAIL (JAKARTA MAIL IMPLEMENTATION) -->
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>2.0.3</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -54,6 +107,7 @@
                 <configuration>
                     <source>17</source>
                     <target>17</target>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
 
@@ -66,4 +120,3 @@
         </plugins>
     </build>
 </project>
-

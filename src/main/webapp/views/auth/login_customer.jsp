@@ -1,0 +1,59 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <title>TEA POS - Đăng Nhập Hội Viên CRM</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.0/dist/sweetalert2.all.min.js"></script>
+    <link href="${pageContext.request.contextPath}/assets/css/global.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: 'Inter', sans-serif; }
+        .auth-card { width: 100%; max-width: 460px; background-color: #ffffff; border-radius: 16px; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--border-color); }
+        .brand-banner { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; text-align: center; padding: 30px 25px; }
+    </style>
+</head>
+<body>
+<div class="auth-card">
+    <div class="brand-banner">
+        <div class="fs-1 mb-2 text-white animate-pulse"><i class="bi bi-cup-hot-fill"></i></div>
+        <h4 class="fw-bold mb-0">TEA POS PORTAL</h4>
+        <small class="opacity-90">Cổng đặt nước trực tuyến & Tích lũy điểm CRM</small>
+    </div>
+    <div class="p-4 text-start">
+        <c:if test="${not empty requestScope.success}">
+            <div class="alert alert-success small text-center mb-3 fw-bold"><i class="bi bi-check-circle-fill"></i> ${requestScope.success}</div>
+        </c:if>
+        <form action="${pageContext.request.contextPath}/customer/login" method="POST">
+            <div class="mb-3">
+                <label class="form-label fw-semibold text-dark small">Email hoặc Số điện thoại</label>
+                <input type="text" class="form-control form-control-teapos" name="username" placeholder="example@teapos.vn hoặc số điện thoại..." required autocomplete="off">
+            </div>
+            <div class="mb-4">
+                <div class="d-flex justify-content-between mb-1">
+                    <label class="form-label fw-semibold text-dark small mb-0">Mật khẩu</label>
+                    <a href="${pageContext.request.contextPath}/forgot-password?role=customer" class="text-decoration-none small text-success fw-bold">Quên mật khẩu?</a>
+                </div>
+                <input type="password" class="form-control form-control-teapos" name="password" placeholder="Nhập mật khẩu..." required>
+            </div>
+            <button type="submit" class="btn btn-primary-teapos w-100 py-3 fw-bold text-uppercase shadow-sm"><i class="bi bi-box-arrow-in-right me-1"></i> ĐĂNG NHẬP THÀNH VIÊN</button>
+            <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-10 d-flex justify-content-between">
+                <a href="${pageContext.request.contextPath}/register" class="text-success text-decoration-none fw-bold small"><i class="bi bi-person-plus-fill"></i> Đăng ký mới</a>
+                <a href="${pageContext.request.contextPath}/activate" class="text-danger text-decoration-none fw-bold small"><i class="bi bi-person-check-fill"></i> Kích hoạt thẻ quầy POS</a>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        <c:if test="${not empty requestScope.error}">
+        Swal.fire({ icon: 'error', title: 'Thất bại', text: '${requestScope.error}', confirmButtonColor: '#ef4444' });
+        </c:if>
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+package controller.admin;
+
+import model.entity.DanhMuc;
+import model.entity.NhatKyHoatDong;
+import repository.impl.NhatKyRepoImpl;
+import service.IDanhMucService;
+import service.impl.DanhMucServiceImpl;
+import util.JsonParserUtil;
+import util.UploadUtil;
+import util.WebUtil;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+
+@WebServlet(name = "DanhMucControllerV3", urlPatterns = {"/admin/danhmuc"})
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024 * 2, // 2MB
+        maxFileSize = 1024 * 1024 * 10,      // 10MB
+        maxRequestSize = 1024 * 1024 * 50    // 50MB
+)
+public class DanhMucController extends HttpServlet {
+    private final IDanhMucService danhMucService = DanhMucServiceImpl.getInstance();
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+        if (action == null) {
+            action = "list";
+        }
+        switch (action) {
+            case "create":
+                showCreateForm(request, response);
+                break;
+            case "edit":
+                showEditForm(request, response);
+                break;
+            case "delete":
+                performDelete(request, response);
+                break;
+            case "toggle":
+                performToggle(request, response);
+                break;
+            default:
+                showList(request, response);
+                break;
+        }
+    }
+
+    private void showList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        List<DanhMuc> list = danhMucService.getAllDanhMuc();
+        request.setAttribute("categories", list);
+        request.getRequestDispatcher("/views/admin/danh_muc.jsp").forward(request, response);
+    }
+
+    private void showCreateForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setAttribute("formTitle", "THÊM DANH MỤC MỚI");
+        request.getRequestDispatcher("/views/admin/danh_muc.jsp").forward(request, response);
+    }
+
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String id = request.getParameter("id");
+        if (id == null || id.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/admin/danhmuc?msg=error");
+            return;
+        }
+        DanhMuc dm = danhMucService.getDanhMucById(id);
+        if (dm != null) {
+            request.setAttribute("category", dm);
+            request.setAttribute("formTitle", "CẬP NHẬT DANH MỤC");
+            request.getRequestDispatcher("/views/admin/danh_muc.jsp").forward(request, response);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/admin/danhmuc?msg=notfound");
+        }
+    }
+
+    private void performToggle(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String id = request.getParameter("id");
+        boolean status = "1".equals(request.getParameter("status"));
+        String actorNv = WebUtil.getCurrentActor(request);
+        String ip = WebUtil.getRemoteIP(request);
+
+        DanhMuc dm = danhMucService.getDanhMucById(id);
+        if (dm != null) {
+            String oldJson = JsonParserUtil.toJson(dm);
+            dm.setTrangThai(status);
+            boolean success = danhMucService.updateDanhMuc(dm);
+            if (success) {
+                NhatKyRepoImpl.getInstance().addLog(new NhatKyHoatDong(
+                        actorNv,
+                        status ? "KÍCH_HOẠT_DANH_MỤC" : "TẠM_NGƯNG_DANH_MỤC",
+                        "DANH_MUC",
+                        oldJson,
+                        JsonParserUtil.toJson(dm),
+                        ip,
+                        null
+                ));
+                response.sendRedirect(request.getContextPath() + "/admin/danhmuc?msg=updatesuccess");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/danhmuc?msg=error");
+            }
+        } else {
+            response.sendRedirect(request.getContextPath() + "/admin/danhmuc?msg=notfound");
+        }
+    }
+
+    private void performDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String id = request.getParameter("id");
+        String actorNv = WebUtil.getCurrentActor(request);
+        String ip = WebUtil.getRemoteIP(request);
+        if (id == null || id.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/admin/danhmuc?msg=error");
+            return;
+        }
+        DanhMuc oldDm = danhMucService.getDanhMucById(id);
+        if (oldDm != null) {
+            String oldJson = JsonParserUtil.toJson(oldDm);
+            boolean success = danhMucService.deleteDanhMuc(id);
+            if (success) {
+                NhatKyRepoImpl.getInstance().addLog(new NhatKyHoatDong(
+                        actorNv, "XÓA_DANH_MỤC", "DANH_MUC", oldJson, "Đã xóa vĩnh viễn danh mục mã: " + id, ip, null
+                ));
+                response.sendRedirect(request.getContextPath() + "/admin/danhmuc?msg=deletesuccess");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/danhmuc?msg=deletefailed");
+            }
+        } else {
+            response.sendRedirect(request.getContextPath() + "/admin/danhmuc?msg=notfound");
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+        if ("create".equals(action)) {
+            performCreate(request, response);
+        } else if ("edit".equals(action)) {
+            performUpdate(request, response);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/admin/danhmuc");
+        }
+    }
+
+    private void performCreate(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String actorNv = WebUtil.getCurrentActor(request);
+        String ip = WebUtil.getRemoteIP(request);
+        try {
+            String tenDm = request.getParameter("tenDm");
+            int thuTu = WebUtil.getIntParameter(request, "thuTuHienThi", 0);
+            boolean trangThai = "1".equals(request.getParameter("trangThai"));
+            String hinhAnh = "";
+            String uploadType = request.getParameter("uploadType");
+            if ("file".equals(uploadType)) {
+                hinhAnh = UploadUtil.uploadFile(request, "hinhAnhFile");
+                if (hinhAnh == null) hinhAnh = "";
+            } else {
+                hinhAnh = request.getParameter("hinhAnhUrl");
+            }
+            DanhMuc dm = new DanhMuc(null, tenDm, hinhAnh, thuTu, trangThai);
+            boolean success = danhMucService.createDanhMuc(dm);
+            if (success) {
+                NhatKyRepoImpl.getInstance().addLog(new NhatKyHoatDong(
+                        actorNv, "THÊM_DANH_MỤC", "DANH_MUC", null, JsonParserUtil.toJson(dm), ip, null
+                ));
+                response.sendRedirect(request.getContextPath() + "/admin/danhmuc?msg=createsuccess");
+            } else {
+                request.setAttribute("category", dm);
+                request.setAttribute("error", "Tên danh mục đã tồn tại trong hệ thống!");
+                request.setAttribute("formTitle", "THÊM DANH MỤC MỚI");
+                request.getRequestDispatcher("/views/admin/danh_muc.jsp").forward(request, response);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/admin/danhmuc?msg=error");
+        }
+    }
+
+    private void performUpdate(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String actorNv = WebUtil.getCurrentActor(request);
+        String ip = WebUtil.getRemoteIP(request);
+        try {
+            String maDm = request.getParameter("maDm");
+            String tenDm = request.getParameter("tenDm");
+            int thuTu = WebUtil.getIntParameter(request, "thuTuHienThi", 0);
+            boolean trangThai = "1".equals(request.getParameter("trangThai"));
+            String hinhAnh = request.getParameter("currentHinhAnh");
+            String uploadType = request.getParameter("uploadType");
+            if ("file".equals(uploadType)) {
+                String uploaded = UploadUtil.uploadFile(request, "hinhAnhFile");
+                if (uploaded != null && !uploaded.isEmpty()) {
+                    hinhAnh = uploaded;
+                }
+            } else {
+                String url = request.getParameter("hinhAnhUrl");
+                if (url != null && !url.trim().isEmpty()) {
+                    hinhAnh = url;
+                }
+            }
+            DanhMuc oldDm = danhMucService.getDanhMucById(maDm);
+            String oldJson = JsonParserUtil.toJson(oldDm);
+            DanhMuc dm = new DanhMuc(maDm, tenDm, hinhAnh, thuTu, trangThai);
+            boolean success = danhMucService.updateDanhMuc(dm);
+            if (success) {
+                NhatKyRepoImpl.getInstance().addLog(new NhatKyHoatDong(
+                        actorNv, "SỬA_DANH_MỤC", "DANH_MUC", oldJson, JsonParserUtil.toJson(dm), ip, null
+                ));
+                response.sendRedirect(request.getContextPath() + "/admin/danhmuc?msg=updatesuccess");
+            } else {
+                request.setAttribute("category", dm);
+                request.setAttribute("error", "Không thể cập nhật. Tên danh mục bị trùng lặp!");
+                request.setAttribute("formTitle", "CẬP NHẬT DANH MỤC");
+                request.getRequestDispatcher("/views/admin/danh_muc.jsp").forward(request, response);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/admin/danhmuc?msg=error");
+        }
+    }
+}
