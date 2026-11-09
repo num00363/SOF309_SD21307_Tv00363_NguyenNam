@@ -1,4 +1,4 @@
-﻿package controller.admin;
+package controller.admin;
 
 import model.entity.DanhMuc;
 import model.entity.KichCo;
