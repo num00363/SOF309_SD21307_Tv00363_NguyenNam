@@ -1,4 +1,4 @@
-﻿# SOF309: KIỂM THỬ NÂNG CAO CÙNG AI
+# SOF309: KIỂM THỬ NÂNG CAO CÙNG AI
 > **Sinh viên:** Nguyễn Nam | **MSSV:** TV00363 | **Lớp:** SD21307  
 > **Dự án Web cá nhân:** TEA POS - Quản Lý & Bán Hàng Trà Sữa / Cà Phê  
 > **Giảng viên hướng dẫn:** ThS. Trần Quang Bình (binhtq7 - Thầy Mười Giáo)  
@@ -19,6 +19,21 @@
   - Báo cáo sửa lỗi chi tiết: [docs/FIXED_BUGS.md](./docs/FIXED_BUGS.md).
   - Kịch bản Database SQL: [CSDL.sql](./CSDL.sql).
   - Nhật ký hoạt động SDLC: [docs/ACTIVITY_LOG.md](./docs/ACTIVITY_LOG.md).
+
+---
+
+### 🏆 BÁO CÁO NGHIỆM THU TUẦN 2 (09/11 - 15/11/2026) - Y3
+- [x] **Viết Unit Test Controller với JUnit 5 nâng cao (Y3):** Đã tạo 4 class test trong src/test/java/com/poly/sof309/controllers/:
+  - [AuthControllerTest.java](./src/test/java/com/poly/sof309/controllers/AuthControllerTest.java): 26 test cases cho form Đăng nhập, Đăng ký, Salted Hash, Khóa tài khoản sau 5 lần sai.
+  - [ProductControllerTest.java](./src/test/java/com/poly/sof309/controllers/ProductControllerTest.java): 25 test cases kiểm tra biên giá bán, tên món, tồn kho, lỗi khóa ngoại giỏ hàng.
+  - [CartControllerTest.java](./src/test/java/com/poly/sof309/controllers/CartControllerTest.java): 16 test cases kiểm tra số lượng món, tính tiền Topping/Size, chống thao túng giá tiền client.
+  - [VoucherControllerTest.java](./src/test/java/com/poly/sof309/controllers/VoucherControllerTest.java): 14 test cases tính tiền giảm giá trần (Cap), điều kiện đơn tối thiểu, hạn dùng.
+- [x] **Kỹ thuật áp dụng theo chuẩn rubric:**
+  - `@ParameterizedTest` + `@CsvSource` quét toàn bộ dữ liệu biên form (Lab 2).
+  - `assertThrows()` kiểm thử ngoại lệ bắt lỗi nghiệp vụ (`IllegalArgumentException`, `IllegalStateException`, `SecurityException`) (Lab 3).
+  - `@Timeout(value = 2, unit = TimeUnit.SECONDS)` kiểm thử timeout hiệu năng không bị treo luồng (Lab 3).
+- [x] **Minh chứng AI (Y6 - Điểm A):** [docs/ai-logs/02_junit_script_ai.md](./docs/ai-logs/02_junit_script_ai.md) (Ghi lại prompt, phiên bản AI **Gemini 3.8 Flash**, kết quả và chỉnh sửa).
+- [x] **Kết quả kiểm thử:** Lệnh `mvn test -Dtest=*ControllerTest` đạt **100% PASS (83/83 Tests Pass, 0 Failures, 0 Errors)**.
 
 ---
 > **Master Template Assignment dành cho Sinh viên FPT Polytechnic**  
@@ -45,7 +60,7 @@ flowchart LR
 | Tuần & Buổi gặp GV | Trọng tâm kỹ thuật thực hiện | Sản phẩm nghiệm thu trên GitHub | Hạn nộp Google Classroom |
 | :---: | :--- | :--- | :--- |
 | **Tuần 1**<br>*(02/11 - 08/11)*<br>**Gặp Buổi 1** | • Khởi tạo Repo từ Template của Thầy.<br>• Đưa Web cá nhân vào `src/main/` và chạy mượt local (**Xong Y1**).<br>• Điền đặc tả `SPECIFICATIONS.md`, nạp AI RAG sinh **Test Plan** & **Test Case** (**Xong Y2**). | • Repo chuẩn tên `SOF309_<LỚP>_<MSSV>_<TÊN>`.<br>• Web chạy được local (`localhost:8080`).<br>• File `TEST_PLAN.md` & `TEST_CASES.md`. | **Chủ Nhật (08/11)**<br>Nộp link Repo cá nhân. |
-| **Tuần 2**<br>*(09/11 - 15/11)*<br>**Gặp Buổi 2** | • Viết Unit Test cho Controller trong `controllers/` (**Xong Y3**).<br>• **`@ParameterizedTest`** + `@CsvSource` kiểm tra biên Form.<br>• **`assertThrows()`** kiểm thử ngoại lệ bắt lỗi nghiệp vụ. | • Thư mục `src/test/java/.../controllers/`.<br>• Lệnh `mvn test` đạt 100% Pass.<br>• File `docs/ai-logs/01_test_design_ai.md`. | **Chủ Nhật (15/11)**<br>Nộp link commit Unit Test. |
+  - `assertThrows()` kiểm thử ngoại lệ bắt lỗi nghiệp vụ (`IllegalArgumentException`, `IllegalStateException`, `SecurityException`) (Lab 3).
 | **Tuần 3**<br>*(16/11 - 22/11)*<br>**Gặp Buổi 3** | • Thiết kế khung **Selenium Page Object Model (POM)** (**Y4 - P1**).<br>• Xây dựng các Page Classes (`LoginPage`, `RegisterPage`, `CrudPage`).<br>• Sử dụng `WebDriverWait` xử lý bất đồng bộ, tương tác DOM. | • Thư mục `src/test/java/.../ui/pages/`.<br>• Kịch bản Selenium mở Chrome chạy mượt mà ở local. | **Chủ Nhật (22/11)**<br>Nộp link commit Selenium POM. |
 | **Tuần 4**<br>*(23/11 - 29/11)*<br>**Gặp Buổi 4** | • Nâng cấp **TestNG Framework** chuyên nghiệp (**Y4 - P2**).<br>• Gắn nhãn **`groups = "smoke"`** và ràng buộc `dependsOnMethods`.<br>• **`@DataProvider`** tự động test lặp nhiều tài khoản.<br>• **`ITestListener`** tự động chụp ảnh màn hình khi test fail. | • File cấu hình `testng.xml`.<br>• Thư mục `screenshots/` chứa ảnh lỗi.<br>• File `docs/ai-logs/03_selenium_pom_ai.md`. | **Chủ Nhật (29/11)**<br>Nộp link commit TestNG & Data-Driven. |
 | **Tuần 5**<br>*(30/11 - 06/12)*<br>**Gặp Buổi 5** | • Cấu hình CI/CD với **GitHub Actions** (`.github/workflows/test.yml`) (**Xong Y5**).<br>• Chạy test chế độ Chrome Headless trên Ubuntu.<br>• Upload báo cáo kiểm thử & ảnh chụp lỗi lên tab **Artifacts**.<br>• Đưa stack trace lỗi cho AI phân tích debug (Y6). | • Tab **Actions** trên GitHub sáng đèn **Xanh (Pass)**.<br>• Tải được file zip báo cáo trong Artifacts.<br>• File `docs/ai-logs/04_debug_logs_ai.md`. | **Chủ Nhật (06/12)**<br>Nộp link tab GitHub Actions báo Xanh. |
