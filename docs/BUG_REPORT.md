@@ -604,6 +604,25 @@ Timestamp thoiGianHenLay = Timestamp.valueOf(targetDate.atTime(targetTime));
 
 ---
 
+### 2.13. BUG-UI-05: Lỗi Vỡ Ảnh (Broken Image) Danh Mục & Sản Phẩm Do Link CDN Hết Hạn & Thiếu Fallback Error Handler
+
+#### 1. Nguyên nhân gây lỗi:
+- **Vị trí phát hiện:** Trang chủ Portal (/views/portal/trang_chu.jsp), Danh mục "Trà Sữa Truyền Thống" (DM00001) và Sản phẩm "Trà Sữa Trân Châu Hoàng Gia" (SP00001).
+- **Mức độ nghiêm trọng:** MEDIUM (Ảnh hưởng trực tiếp đến trải nghiệm giao diện người dùng).
+- **Nguyên nhân gốc rễ:**
+  - Bản ghi mẫu trong CSDL trỏ tới URL CDN Unsplash đã bị tác giả xóa hoặc thay đổi (photo-1558857563-b37cfb496f8c).
+  - Trên các trang JSP (	rang_chu.jsp, danh_sach_san_pham.jsp, chi_tiet_san_pham.jsp), thẻ <img> không có thuộc tính bắt lỗi onerror, dẫn đến việc khi CDN ngoài bị nghẽn mạng hoặc lỗi 404 thì trình duyệt sẽ hiển thị biểu tượng ảnh rách (broken image icon) làm mất thẩm mỹ.
+
+#### 2. Cách khắc phục:
+1. **Cập nhật CSDL:** Thay thế URL ảnh bị hỏng sang link ảnh Unsplash hoạt động ổn định vĩnh viễn:
+   `sql
+   UPDATE DANH_MUC SET hinh_anh = 'https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=300' WHERE ma_dm = 'DM00001';
+   UPDATE SAN_PHAM SET hinh_anh = 'https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=500' WHERE ma_sp = 'SP00001';
+   `
+2. **Bổ sung Fallback Handler trên JSP:** Thêm sự kiện onerror="this.onerror=null;this.src='...';" để khi gặp bất kỳ sự cố mạng nào với ảnh ngoài, hệ thống sẽ tự động chuyển sang ảnh đồ uống mặc định mượt mà.
+
+---
+
 ## 3. LỘ TRÌNH VÁ LỖI KHUYẾN NGHỊ (REMEDIATION ACTION PLAN)
 
 1. **Ưu tiên 1 (Vá ngay lập tức trong 1 giờ đầu):**

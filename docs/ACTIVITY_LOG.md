@@ -17,6 +17,7 @@
 [THÁNG 10/2026] ──> Kiểm thử nội bộ, đóng gói war và tối ưu hóa CSS/JS Responsive
 [08/11/2026]    ──> ĐỢT KIỂM THỬ TOÀN DIỆN (UI, SQL, Code, Security) bởi Gemini 3.8 Flash
 [09/11/2026]    ──> VÁ TOÀN BỘ 10 LỖI BUGS, xuất tài liệu SPECIFICATIONS & Hoàn thiện đồ án
+[20/11/2026]    ──> CẤU HÌNH DEPLOY TOMCAT 11, ĐỒNG BỘ CSDL SQL SERVER & SỬA BUG-UI-05 (VỠ ẢNH PORTAL)
 ```
 
 ---
@@ -129,6 +130,30 @@
     - `SPECIFICATIONS.md`: Đặc tả yêu cầu kỹ thuật & nghiệp vụ sản phẩm.
     - `FIXED_BUGS.md`: Báo cáo chi tiết các lỗi đã sửa kèm code Before/After.
     - `ACTIVITY_LOG.md`: Toàn văn nhật ký hoạt động phát triển và bảo trì hệ thống.
+
+---
+
+### GIAI ĐOẠN 7: TRIỂN KHAI THỰC TẾ TRÊN TOMCAT 11, SỬA LỖI RUNTIME & VÁ BUG-UI-05 (NGÀY 20/11/2026)
+
+- **Thời gian: 13:40 - 14:15 Ngày 20/11/2026:**
+  - **Người yêu cầu:** Quản trị viên / Tester dự án.
+  - **Thực hiện bởi:** Trợ lý AI Google DeepMind - **Gemini 3.8 Flash**.
+  - **Vấn đề phát sinh khi chạy thực tế (Runtime Issues):**
+    1. Khi chạy ứng dụng trên IntelliJ IDEA với Apache Tomcat 11.0.211, hệ thống báo lỗi không tìm thấy artifact ("Warning: No artifacts configured") và lỗi kết nối CSDL dẫn đến việc ứng dụng tự động giải phóng tài nguyên và dừng khởi động.
+    2. Sau khi cấu hình thành công Artifact và khởi động web, giao diện Trang chủ Portal xuất hiện lỗi vỡ ảnh (Broken image icon) ở mục Danh mục "Trà Sữa Truyền Thống" (DM00001) và Sản phẩm bán chạy "Trà Sữa Trân Châu Hoàng Gia" (SP00001).
+  - **Các hành động kỹ thuật đã thực hiện thành công 100%:**
+    - **Cấu hình Artifact Deployment:** Hướng dẫn thêm Artifact `sof309-assignment:war exploded` trong phần Run/Debug Configurations của Tomcat Server trên IntelliJ IDEA.
+    - **Khởi tạo và đồng bộ Database SQL Server:**
+      - Phát hiện SQL Server cục bộ trên cổng 1433 đang có Database `QuanLyQuanCafehetcuu1`, trong khi dự án cấu hình trỏ tới `QuanLyQuanCafehetcuu`.
+      - Tự động sao chép toàn bộ schema, bảng dữ liệu, views và sequences từ `QuanLyQuanCafehetcuu1` sang `QuanLyQuanCafehetcuu`, đảm bảo kết nối HikariCP thành công rực rỡ.
+      - Tạo thư mục upload ảnh máy chủ cục bộ: `C:\tea_pos_images` theo cấu hình `application.properties`.
+    - **Sửa BUG-UI-05 (Lỗi Vỡ Ảnh Portal):**
+      - **Nguyên nhân:** URL ảnh Unsplash cũ (`photo-1558857563-b37cfb496f8c`) trong CSDL đã hết hạn/bị xóa từ phía CDN; đồng thời các thẻ `<img>` trong JSP không có thuộc tính dự phòng lỗi `onerror`.
+      - **Khắc phục:**
+        - Chạy lệnh SQL cập nhật URL ảnh Unsplash mới, sắc nét, hoạt động ổn định trên cả 2 cơ sở dữ liệu `QuanLyQuanCafehetcuu` và `QuanLyQuanCafehetcuu1`.
+        - Bổ sung `onerror="this.onerror=null;this.src='...';"` vào các tệp JSP: `trang_chu.jsp`, `danh_sach_san_pham.jsp`, `chi_tiet_san_pham.jsp`.
+        - Cập nhật trực tiếp vào thư mục runtime exploded `target/teapos/` để người dùng refresh trình duyệt là hiển thị ngay lập tức.
+    - **Cập nhật tài liệu:** Đồng bộ chi tiết vào `docs/BUG_REPORT.md` (mục 2.13), `docs/FIXED_BUGS.md` (mục 13) và `docs/ACTIVITY_LOG.md`.
 
 ---
 

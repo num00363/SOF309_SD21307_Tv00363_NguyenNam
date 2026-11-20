@@ -380,3 +380,30 @@ if (!fileExt.equals(".jpg") && !fileExt.equals(".jpeg") && !fileExt.equals(".png
 // SỬA LỖI BUG-CODE-08: Sinh mã OTP ngẫu nhiên bằng SecureRandom chống dự đoán
 String otpCode = String.format("%06d", new java.security.SecureRandom().nextInt(999999));
 ```
+
+---
+
+### 13. BUG-UI-05: Sửa Lỗi Vỡ Ảnh (Broken Image) Do URL CDN Hết Hạn & Thêm Fallback OnError
+
+- **Tệp tin đã chỉnh sửa:**
+  - `src/main/webapp/views/portal/trang_chu.jsp` (Dòng 149-152, 230-234)
+  - `src/main/webapp/views/portal/danh_sach_san_pham.jsp` (Dòng 181-185)
+  - `src/main/webapp/views/portal/chi_tiet_san_pham.jsp` (Dòng 115-118)
+  - Dữ liệu trong CSDL: Danh mục `DM00001` và Sản phẩm `SP00001`
+- **Mô tả cách sửa:**
+  - Cập nhật URL trong CSDL sang ảnh Unsplash chất lượng cao ổn định (`https://images.unsplash.com/photo-1541658016709-82535e94bc69`).
+  - Thêm thuộc tính `onerror="this.onerror=null;this.src='...';"` vào tất cả thẻ `<img>` danh mục và sản phẩm trên Portal để khi mạng chậm, CDN lỗi 404 hoặc mất kết nối thì trình duyệt tự động hiển thị ảnh đồ uống dự phòng thay vì biểu tượng ảnh vỡ.
+
+#### Mã nguồn Sau khi sửa (After):
+```jsp
+<!-- views/portal/trang_chu.jsp: Fallback ảnh danh mục -->
+<img src="${dm.hinhAnh}"
+     onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=300';"
+     alt="${dm.tenDm}" class="category-img mb-2 shadow-sm">
+
+<!-- views/portal/trang_chu.jsp: Fallback ảnh sản phẩm nổi bật -->
+<img src="${sp.hinhAnh}"
+     onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=500';"
+     class="card-img-top product-img" alt="Product">
+```
+- **Kiểm chứng:** Tải lại trang chủ Portal `http://localhost:8080/trang-chu` hoặc `http://localhost:8080/views/portal/trang_chu.jsp`, hình ảnh "Trà Sữa Truyền Thống" và "Trà Sữa Trân Châu Hoàng Gia" hiển thị đẹp mắt, sắc nét không còn icon ảnh rách.

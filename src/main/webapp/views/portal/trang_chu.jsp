@@ -42,7 +42,7 @@
                     <div class="category-circle-card p-3 border rounded-3 bg-white shadow-sm" onclick="window.location.href='${pageContext.request.contextPath}/products?category=${cat.maDm}'">
                         <c:choose>
                             <c:when test="${not empty cat.hinhAnh}">
-                                <img src="${cat.hinhAnh}" class="mx-auto rounded-circle mb-3 border border-2 border-success" style="width: 70px; height: 70px; object-fit: cover;">
+                                <img src="${cat.hinhAnh}" class="mx-auto rounded-circle mb-3 border border-2 border-success" style="width: 70px; height: 70px; object-fit: cover;" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=300';">
                             </c:when>
                             <c:otherwise>
                                 <div class="mx-auto bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
@@ -70,7 +70,7 @@
                 <div class="col">
                     <div class="product-card p-2.5 p-md-3 shadow-sm position-relative">
                         <span class="position-absolute top-0 end-0 badge bg-danger text-white fw-bold m-2 px-2.5 py-1.5 shadow-sm" style="border-radius: 8px; font-size: 10px; z-index: 10;">BESTSELLER 🔥</span>
-                        <img src="${not empty sp.hinhAnh ? sp.hinhAnh : 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png'}" class="w-100 rounded mb-3 product-card-img" style="height: 180px; object-fit: cover;" alt="Product">
+                        <img src="${not empty sp.hinhAnh ? sp.hinhAnh : 'https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=500'}" class="w-100 rounded mb-3 product-card-img" style="height: 180px; object-fit: cover;" alt="Product" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=500';">
                         <h6 class="fw-bold text-dark mb-1 text-truncate product-card-title"><c:out value="${sp.tenSp}"/></h6>
                         <p class="text-muted small text-truncate mb-3 d-none d-md-block product-card-desc"><c:out value="${sp.moTa}"/></p>
 
@@ -106,7 +106,7 @@
                 <div class="col">
                     <div class="product-card p-3 shadow-sm position-relative">
                         <span class="position-absolute top-0 end-0 badge bg-warning text-dark fw-bold m-2 px-2.5 py-1.5 shadow-sm" style="border-radius: 8px; font-size: 10px; z-index: 10;">NEW ✨</span>
-                        <img src="${not empty sp.hinhAnh ? sp.hinhAnh : 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png'}" class="w-100 rounded mb-3 product-card-img" style="height: 180px; object-fit: cover;" alt="Product">
+                        <img src="${not empty sp.hinhAnh ? sp.hinhAnh : 'https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=500'}" class="w-100 rounded mb-3 product-card-img" style="height: 180px; object-fit: cover;" alt="Product" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=500';">
                         <h6 class="fw-bold text-dark mb-1 text-truncate product-card-title"><c:out value="${sp.tenSp}"/></h6>
                         <p class="text-muted small text-truncate mb-3 d-none d-md-block product-card-desc"><c:out value="${sp.moTa}"/></p>
 

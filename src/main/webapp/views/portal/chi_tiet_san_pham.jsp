@@ -21,7 +21,7 @@
         <!-- ẢNH ĐỒ UỐNG BÊN TRÁI -->
         <div class="col-12 col-md-5 text-start">
             <div class="sticky-top" style="top: 80px;">
-                <img src="${not empty product.hinhAnh ? product.hinhAnh : 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png'}" class="w-100 rounded-4 shadow-sm border detail-product-img" style="object-fit: cover;" alt="Tea">
+                <img src="${not empty product.hinhAnh ? product.hinhAnh : 'https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=500'}" class="w-100 rounded-4 shadow-sm border detail-product-img" style="object-fit: cover;" alt="Tea" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=500';">
             </div>
         </div>
 

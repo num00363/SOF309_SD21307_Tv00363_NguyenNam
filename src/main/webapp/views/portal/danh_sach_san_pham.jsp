@@ -108,7 +108,7 @@
                                     </c:if>
 
                                     <!-- Ảnh minh họa -->
-                                    <img src="${not empty item.hinhAnh ? item.hinhAnh : 'https://cdn-icons-png.flaticon.com/512/3177/3177440.png'}" class="product-card-img rounded mb-2.5" alt="Pic">
+                                    <img src="${not empty item.hinhAnh ? item.hinhAnh : 'https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=500'}" class="product-card-img rounded mb-2.5" alt="Pic" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1541658016709-82535e94bc69?w=500';">
 
                                     <!-- Thông tin cốc nước -->
                                     <div class="product-card-body p-0">
