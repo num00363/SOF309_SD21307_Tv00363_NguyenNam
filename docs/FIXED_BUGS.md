@@ -407,3 +407,46 @@ String otpCode = String.format("%06d", new java.security.SecureRandom().nextInt(
      class="card-img-top product-img" alt="Product">
 ```
 - **Kiểm chứng:** Tải lại trang chủ Portal `http://localhost:8080/trang-chu` hoặc `http://localhost:8080/views/portal/trang_chu.jsp`, hình ảnh "Trà Sữa Truyền Thống" và "Trà Sữa Trân Châu Hoàng Gia" hiển thị đẹp mắt, sắc nét không còn icon ảnh rách.
+
+---
+
+### 14. BUG-TEST-01: Làm Rõ Dữ Liệu `@CsvSource` Gây Nhầm Lẫn Luồng Kiểm Tra Confirm Password
+
+- **Tệp tin đã chỉnh sửa:** `src/test/java/com/poly/sof309/controllers/AuthControllerTest.java` (Dòng 69)
+- **Mô tả cách sửa:** Đổi giá trị `confirmPassword` ở dòng CsvSource đầu tiên (SĐT rỗng) từ `'Pass@1234'` sang `'N/A'` và thêm comment giải thích rõ rằng khi SĐT rỗng, hàm `validateRegisterInput()` đã `return false` ngay tại bước kiểm tra SĐT, nên confirmPassword không có tác động tới kết quả test.
+
+#### Mã nguồn Trước khi sửa (Before):
+```java
+"'',  'Pass@1234',  'Pass@1234',  false, 'SĐT không được để trống'"
+```
+
+#### Mã nguồn Sau khi sửa (After):
+```java
+// FIX BUG-TEST-01: SĐT rỗng → hàm return false ngay tại bước kiểm tra SĐT,
+// confirmPassword KHÔNG có tác động. Dùng 'N/A' để tránh hiểu nhầm.
+"'',  'Pass@1234',  'N/A',  false, 'SĐT không được để trống'"
+```
+- **Kiểm chứng:** Chạy lại `TC_AUTH_VAL_02` trong IntelliJ, tất cả 8 ca kiểm thử tiếp tục Pass. Code rõ ràng, dễ đọc hơn.
+
+---
+
+### 15. BUG-TEST-02: Sửa Mật Khẩu Hardcode `"123"` Vi Phạm Quy Tắc 6 Ký Tự trong `SampleControllerTest`
+
+- **Tệp tin đã chỉnh sửa:** `src/test/java/com/poly/sof309/controllers/SampleControllerTest.java` (Dòng 21 & Dòng 39)
+- **Mô tả cách sửa:** Thay thế chuỗi mật khẩu `"123"` (3 ký tự — vi phạm quy tắc tối thiểu 6 ký tự) thành `"123456"` trong cả phần khai báo test và hàm `authenticate()` hardcode để đảm bảo tính nhất quán với `AuthControllerTest.validateLoginInput()`.
+
+#### Mã nguồn Trước khi sửa (Before):
+```java
+String password = "123";
+// ...
+return "admin".equals(user) && "123".equals(pass);
+```
+
+#### Mã nguồn Sau khi sửa (After):
+```java
+// FIX BUG-TEST-02: Đổi password từ "123" sang "123456" để đáp ứng quy tắc tối thiểu 6 ký tự
+String password = "123456";
+// ...
+return "admin".equals(user) && "123456".equals(pass);
+```
+- **Kiểm chứng:** Chạy lại `SampleControllerTest`, cả 2 ca `TC_AUTH_01` và `TC_AUTH_02` đều Pass, không còn mâu thuẫn với quy tắc nghiệp vụ trong `AuthControllerTest`.

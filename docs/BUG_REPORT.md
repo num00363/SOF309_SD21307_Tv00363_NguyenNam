@@ -623,6 +623,61 @@ Timestamp thoiGianHenLay = Timestamp.valueOf(targetDate.atTime(targetTime));
 
 ---
 
+### BUG-TEST-01: Dữ liệu `@CsvSource` Gây Hiểu Nhầm Luồng Kiểm Tra Confirm Password trong `AuthControllerTest`
+
+- **Vị trí lỗi:** `src/test/java/com/poly/sof309/controllers/AuthControllerTest.java` (Dòng 69)
+- **Mức độ nghiêm trọng:** **LOW** (Logic test vẫn đúng về mặt kết quả, nhưng gây nhầm lẫn khi đọc code)
+- **Phân loại:** Test Code Quality / Misleading Test Data
+
+#### 1. Nguyên nhân gây lỗi (Root Cause Analysis):
+Trong dòng `@CsvSource` đầu tiên của `TC_AUTH_VAL_02`:
+```java
+"'', 'Pass@1234', 'Pass@1234', false, 'SĐT không được để trống'"
+```
+Hàm `validateRegisterInput()` kiểm tra theo thứ tự:
+1. Kiểm tra SĐT regex → SĐT rỗng `''` → `return false` **ngay lập tức**
+2. Kiểm tra độ dài mật khẩu → **Không bao giờ được thực thi**
+3. So sánh confirm password → **Không bao giờ được thực thi**
+
+Do đó, giá trị `confirmPassword` trong dòng này (`'Pass@1234'` hay bất kỳ giá trị nào) **hoàn toàn không có tác động tới kết quả test**. Khi đọc code, người xem dễ nhầm tưởng confirm password là điều đang được kiểm tra.
+
+#### 2. Cách khắc phục:
+Đổi giá trị `confirmPassword` sang `'N/A'` và thêm comment làm rõ luồng thực thi:
+```java
+// FIX BUG-TEST-01: SĐT rỗng → hàm return false ngay tại bước kiểm tra SĐT,
+// confirmPassword KHÔNG có tác động. Dùng 'N/A' để tránh hiểu nhầm.
+"'', 'Pass@1234', 'N/A', false, 'SĐT không được để trống'"
+```
+
+---
+
+### BUG-TEST-02: Mật Khẩu Hardcode `"123"` trong `SampleControllerTest` Mâu Thuẫn Quy Tắc 6 Ký Tự Tối Thiểu
+
+- **Vị trí lỗi:** `src/test/java/com/poly/sof309/controllers/SampleControllerTest.java` (Dòng 21 & Dòng 39)
+- **Mức độ nghiêm trọng:** **LOW** (Test pass nhưng vi phạm tính nhất quán của bộ test)
+- **Phân loại:** Test Code Quality / Business Rule Inconsistency
+
+#### 1. Nguyên nhân gây lỗi (Root Cause Analysis):
+`SampleControllerTest.testLoginSuccess()` sử dụng mật khẩu `"123"` (chỉ 3 ký tự) và kỳ vọng `assertTrue` (đăng nhập thành công). Tuy nhiên, `AuthControllerTest.validateLoginInput()` áp dụng quy tắc nghiệp vụ bắt buộc tối thiểu 6 ký tự:
+```java
+if (cleanPass.length() < 6) return false;
+```
+Hai file test này **mâu thuẫn trực tiếp với nhau** về quy tắc độ dài mật khẩu.
+
+#### 2. Cách khắc phục:
+Đổi password từ `"123"` → `"123456"` trong cả `testLoginSuccess()` và hàm `authenticate()`:
+```java
+// TRƯỚC (sai)
+String password = "123";
+return "admin".equals(user) && "123".equals(pass);
+
+// SAU (đúng)
+String password = "123456";
+return "admin".equals(user) && "123456".equals(pass);
+```
+
+---
+
 ## 3. LỘ TRÌNH VÁ LỖI KHUYẾN NGHỊ (REMEDIATION ACTION PLAN)
 
 1. **Ưu tiên 1 (Vá ngay lập tức trong 1 giờ đầu):**
@@ -640,3 +695,5 @@ Timestamp thoiGianHenLay = Timestamp.valueOf(targetDate.atTime(targetTime));
    - Bổ sung whitelist đuôi file ảnh trong `UploadUtil` (BUG-CODE-07).
    - Thêm thẻ điều kiện `<c:if>` ẩn nút Admin tại quầy POS (BUG-UI-02).
    - Xử lý mốc thời gian qua nửa đêm trong `PortalCheckoutController` (BUG-UI-03).
+   - Làm rõ luồng kiểm tra dữ liệu `@CsvSource` trong `AuthControllerTest` (BUG-TEST-01).
+   - Đổi mật khẩu hardcode từ `"123"` sang `"123456"` trong `SampleControllerTest` (BUG-TEST-02).

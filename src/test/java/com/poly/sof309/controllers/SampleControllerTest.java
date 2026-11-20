@@ -16,9 +16,10 @@ public class SampleControllerTest {
     @Test
     @DisplayName("TC_AUTH_01: Kiểm tra đăng nhập với thông tin hợp lệ")
     public void testLoginSuccess() {
-        // Giả lập logic kiểm tra đăng nhập
+        // FIX BUG-TEST-02: Đổi password từ "123" (3 ký tự, vi phạm quy tắc tối thiểu 6 ký tự)
+        // sang "123456" để thống nhất với quy tắc nghiệp vụ trong AuthControllerTest.validateLoginInput()
         String username = "admin";
-        String password = "123";
+        String password = "123456";
         
         boolean isValidUser = authenticate(username, password);
         assertTrue(isValidUser, "Đăng nhập phải thành công với tài khoản đúng");
@@ -35,8 +36,9 @@ public class SampleControllerTest {
     }
 
     // Hàm giả lập (Sinh viên thay bằng gọi trực tiếp Controller / Service của dự án web)
+    // FIX BUG-TEST-02: Đổi password hardcode từ "123" sang "123456" để khớp với sửa đổi trên
     private boolean authenticate(String user, String pass) {
-        return "admin".equals(user) && "123".equals(pass);
+        return "admin".equals(user) && "123456".equals(pass);
     }
 }
 

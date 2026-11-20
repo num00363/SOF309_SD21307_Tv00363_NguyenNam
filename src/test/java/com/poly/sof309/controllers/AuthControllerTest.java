@@ -66,12 +66,15 @@ public class AuthControllerTest {
     @ParameterizedTest(name = "[{index}] SĐT=''{0}'', Pass=''{1}'', Confirm=''{2}'' => Thành công: {3} ({4})")
     @DisplayName("TC_AUTH_VAL_02: Kiểm tra validation biên cho form Đăng ký tài khoản khách hàng")
     @CsvSource({
-            "'',            'Pass@1234',   'Pass@1234',   false, 'SĐT không được để trống'",
+            // FIX BUG-TEST-01: SĐT rỗng → hàm return false ngay tại bước kiểm tra SĐT,
+            // confirmPassword KHÔNG có tác động tới kết quả. Dùng 'N/A' để tránh hiểu nhầm.
+            "'',            'Pass@1234',   'N/A',         false, 'SĐT không được để trống'",
             "'090123456',   'Pass@1234',   'Pass@1234',   false, 'SĐT thiếu số (9 chữ số)'",
             "'09012345678', 'Pass@1234',   'Pass@1234',   false, 'SĐT thừa số (11 chữ số)'",
             "'0101234567',  'Pass@1234',   'Pass@1234',   false, 'Đầu số không hợp lệ (01)'",
             "'090123456a',  'Pass@1234',   'Pass@1234',   false, 'SĐT chứa ký tự chữ'",
             "'0901234567',  '12345',       '12345',       false, 'Mật khẩu dưới 6 ký tự'",
+            // Ca test confirm password THỰC SỰ: SĐT hợp lệ nhưng confirm sai → hàm mới chạy tới bước so sánh
             "'0901234567',  'Pass@1234',   'Pass@9999',   false, 'Mật khẩu xác nhận không khớp'",
             "'0901234567',  'Pass@1234',   'Pass@1234',   true,  'Đăng ký tài khoản hợp lệ'"
     })

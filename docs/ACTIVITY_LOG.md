@@ -157,6 +157,22 @@
 
 ---
 
+### GIAI ĐOẠN 8: PHÁT HIỆN & VÁ LỖI UNIT TEST (NGÀY 20/11/2026)
+
+- **Thời gian: 14:25 - 14:35 Ngày 20/11/2026:**
+  - **Người yêu cầu:** Quản trị viên / Tester dự án.
+  - **Thực hiện bởi:** Trợ lý AI Google DeepMind - **Gemini 3.8 Flash**.
+  - **Vấn đề phát hiện khi review 5 file test trong thư mục `src/test/java/com/poly/sof309/controllers/`:**
+    1. **BUG-TEST-01** (`AuthControllerTest.java`, dòng 69): Dòng CsvSource đầu tiên của `TC_AUTH_VAL_02` đặt `confirmPassword = 'Pass@1234'` trong khi SĐT rỗng `''`. Hàm `validateRegisterInput()` đã `return false` ngay tại bước kiểm tra SĐT, khiến giá trị `confirmPassword` **không có tác động tới kết quả** — gây hiểu nhầm nghiêm trọng khi đọc code.
+    2. **BUG-TEST-02** (`SampleControllerTest.java`, dòng 21 & 39): Mật khẩu hardcode `"123"` (3 ký tự) được dùng với `assertTrue` — mâu thuẫn trực tiếp với quy tắc nghiệp vụ tối thiểu 6 ký tự trong `AuthControllerTest.validateLoginInput()`.
+  - **Các hành động kỹ thuật đã thực hiện:**
+    - **Sửa BUG-TEST-01:** Đổi `confirmPassword` sang `'N/A'` và thêm comment giải thích rõ luồng thực thi trong `AuthControllerTest.java`.
+    - **Sửa BUG-TEST-02:** Đổi password từ `"123"` → `"123456"` trong cả `testLoginSuccess()` và hàm `authenticate()` trong `SampleControllerTest.java`.
+    - **Cập nhật tài liệu:** Ghi nhận `BUG-TEST-01` & `BUG-TEST-02` vào `docs/BUG_REPORT.md` (mục 2.14 & 2.15) và `docs/FIXED_BUGS.md` (mục 14 & 15).
+    - **Git commit & push** toàn bộ thay đổi lên GitHub `main` branch.
+
+---
+
 ## 3. TỔNG KẾT TRẠNG THÁI DỰ ÁN
 
 - **Chất lượng mã nguồn:** Ổn định, phân tầng rõ ràng, tuân thủ mô hình MVC (Model - View - Controller).
